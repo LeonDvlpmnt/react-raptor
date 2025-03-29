@@ -20,9 +20,6 @@
     },
     "plugins": [
       "expo-router",
-      "expo-router",
-      "expo-font",
-      "expo-router",
       "expo-font",
       [
         "expo-splash-screen",
@@ -32,8 +29,7 @@
           "imageWidth": 200
         }
       ],
-      "react-native-edge-to-edge",
-      "expo-build-properties"
+      "react-native-edge-to-edge"
     ],
     "experiments": {
       "typedRoutes": true,
