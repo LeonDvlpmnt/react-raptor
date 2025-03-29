@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "ReactRaptor",
+    "slug": "react-raptor",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "platforms": [
+      "android"
+    ],
+    "scheme": "react-raptor",
+    "userInterfaceStyle": "automatic",
+    "android": {
+      "newArchEnabled": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#191716"
+      },
+      "package": "com.leonhh.reactraptor"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-router",
+      "expo-font",
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#191716",
+          "image": "./assets/images/adaptive-icon.png",
+          "imageWidth": 200
+        }
+      ],
+      "react-native-edge-to-edge",
+      "expo-build-properties"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "829cb782-64f6-43d5-a83b-7a6130b16010"
+      }
+    },
+    "owner": "leonhh",
+    "updates": {
+      "url": "https://u.expo.dev/829cb782-64f6-43d5-a83b-7a6130b16010"
+    },
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "ios": {
+      "bundleIdentifier": "com.leonhh.reactraptor"
+    }
+  }
+}
