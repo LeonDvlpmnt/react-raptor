@@ -25,6 +25,7 @@ export const DetailsTab = (props: Props) => {
     versionName,
     expoConfig,
     permissions,
+    dependencies,
   } = app;
 
   const playStoreLink = `https://play.google.com/store/apps/details?id=${packageName}`;
@@ -67,6 +68,13 @@ export const DetailsTab = (props: Props) => {
           <Text style={styles.itemTitle}>Expo version</Text>
           <Text style={styles.itemText}>{expoConfig?.sdkVersion ?? "N/A"}</Text>
         </View>
+
+        {dependencies ? (
+          <View style={styles.item}>
+            <Text style={styles.itemTitle}>NPM Dependencies</Text>
+            <Text style={styles.itemText}>{JSON.stringify(dependencies, null, 2)}</Text>
+          </View>
+        ) : null}
 
         <View style={styles.item}>
           <Text style={styles.itemTitle}>Native Libraries</Text>

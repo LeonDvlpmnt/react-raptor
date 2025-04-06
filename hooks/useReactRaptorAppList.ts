@@ -16,6 +16,7 @@ export type ReactRaptorApp = AndroidAppListPackage & {
   nativeLibraries: string[];
   expoConfig?: ExpoConfig;
   permissions: string[];
+  dependencies?: Record<string, string>;
 };
 
 export const useReactRaptorAppList = () => {
@@ -36,22 +37,26 @@ export const useReactRaptorAppList = () => {
         );
 
         if (nativeLibraries.some((lib) => reactNativeLibraries.includes(lib))) {
-          const [filesResult, iconResult, permissionsResult] = await Promise.allSettled([
+          const [appConfigResult, depsResult, iconResult, permissionsResult] = await Promise.allSettled([
             ExpoAndroidAppList.getFiles(pkg.packageName, ["assets/app.config"]),
+            ExpoAndroidAppList.getFiles(pkg.packageName, ["modules.json"]),
             ExpoAndroidAppList.getAppIcon(pkg.packageName),
             ExpoAndroidAppList.getPermissions(pkg.packageName),
           ]);
 
-          const files = filesResult.status === 'fulfilled' ? filesResult.value : undefined;
+          const appConfigContent = appConfigResult.status === 'fulfilled' ? appConfigResult.value : undefined;
+          const dependenciesContent = depsResult.status === 'fulfilled' ? depsResult.value : undefined;
           const icon = iconResult.status === 'fulfilled' ? iconResult.value : '';
           const permissions = permissionsResult.status === 'fulfilled' ? permissionsResult.value : [];
 
-          const config = files?.[0]?.content;
+          const config = appConfigContent?.[0]?.content;
+          const dependencies = JSON.parse(dependenciesContent?.[0]?.content ?? "{}") as Record<string, string>;
 
           combinedResults.push({
             ...pkg,
             icon,
             expoConfig: config ? (JSON.parse(config) as ExpoConfig) : undefined,
+            dependencies: Object.keys(dependencies).length > 0 ? dependencies : undefined,
             nativeLibraries,
             permissions,
           });
