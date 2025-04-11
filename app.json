@@ -29,7 +29,8 @@
           "imageWidth": 200
         }
       ],
-      "react-native-edge-to-edge"
+      "react-native-edge-to-edge",
+      "expo-build-properties"
     ],
     "experiments": {
       "typedRoutes": true,
