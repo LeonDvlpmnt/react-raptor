@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NoResults } from "@/components/NoResults";
 import { useReactRaptorAppList } from "@/hooks/useReactRaptorAppList";
 import { useEffect } from "react";
+import { FilterButton } from "@/components/FilterButton";
 
 export default function Index() {
   const navigation = useNavigation();
@@ -16,14 +17,13 @@ export default function Index() {
   useEffect(() => {
     navigation.setOptions({
       title: "React Native Apps",
-      // There seems to be a bug in react-native-screens that causes the button to show incorrectly
-      // headerRight: () => <FilterButton />,
+      headerRight: () => <FilterButton />,
     });
   }, []);
 
   const insets = useSafeAreaInsets();
 
-  const { showNewArchitectureTag } = useSettingsStore();
+  const { enabledTags } = useSettingsStore();
 
   if (isPending) {
     return <LoadingApps />;
@@ -40,10 +40,10 @@ export default function Index() {
       }}
       data={data}
       renderItem={({ item }) => (
-        <AppItem item={item} showNewArchitectureTag={showNewArchitectureTag} />
+        <AppItem item={item} enabledTags={enabledTags} />
       )}
       keyExtractor={(item) => item.packageName}
-      extraData={showNewArchitectureTag}
+      extraData={enabledTags}
     />
   );
 }

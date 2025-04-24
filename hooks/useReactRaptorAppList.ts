@@ -64,6 +64,7 @@ export const reactRaptorAppListQueryFn = async () => {
 export const useReactRaptorAppList = () => {
   const query = useQuery({
     queryKey: ["packages"],
+    staleTime: 1000 * 60 * 5,
     queryFn: reactRaptorAppListQueryFn,
   });
 
