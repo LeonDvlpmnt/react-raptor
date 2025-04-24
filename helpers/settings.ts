@@ -5,8 +5,8 @@ import { persist, createJSONStorage } from "zustand/middleware";
 type SettingsStore = {
   hasFinishedOnboarding: boolean;
   setHasFinishedOnboarding: (value: boolean) => void;
-  showNewArchitectureTag: boolean;
-  setShowNewArchitectureFlag: (value: boolean) => void;
+  enabledTags: string[];
+  toggleTag: (tag: string) => void;
 };
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -16,9 +16,17 @@ export const useSettingsStore = create<SettingsStore>()(
       setHasFinishedOnboarding: (value) => {
         set({ hasFinishedOnboarding: value });
       },
-      showNewArchitectureTag: true,
-      setShowNewArchitectureFlag: (value) => {
-        set({ showNewArchitectureTag: value });
+      enabledTags: ["expo-modules", "expo-updates"],
+      toggleTag: (tag) => {
+        set((state) => {
+          const isTagEnabled = state.enabledTags.includes(tag);
+
+          return {
+            enabledTags: isTagEnabled
+              ? state.enabledTags.filter((t) => t !== tag)
+              : [...state.enabledTags, tag],
+          };
+        });
       },
     }),
     {

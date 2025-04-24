@@ -6,13 +6,13 @@ import { ReactRaptorApp } from "@/hooks/useReactRaptorAppList";
 
 type Props = {
   item: ReactRaptorApp;
-  showNewArchitectureTag?: boolean;
+  enabledTags?: string[];
 };
 
 export const AppItem = (props: Props) => {
   const {
     item: { appName, packageName, icon, nativeLibraries, expoConfig },
-    showNewArchitectureTag = false,
+    enabledTags = [],
   } = props;
 
   const probablyNewArchitecture = nativeLibraries.includes("libappmodules.so");
@@ -36,19 +36,20 @@ export const AppItem = (props: Props) => {
             <Text style={styles.appName}>{appName}</Text>
             <Text style={styles.packageName}>{packageName}</Text>
             <View style={styles.tags}>
-              {probablyExpo ? (
+              {probablyExpo && enabledTags.includes("expo-modules") ? (
                 <View style={[styles.tag, { backgroundColor: "#000" }]}>
                   <Text style={styles.tagText}>Expo modules</Text>
                 </View>
               ) : null}
 
-              {probablyNewArchitecture && showNewArchitectureTag ? (
+              {probablyNewArchitecture &&
+              enabledTags.includes("new-architecture") ? (
                 <View style={[styles.tag, { backgroundColor: "#28a745" }]}>
                   <Text style={styles.tagText}>New Architecture</Text>
                 </View>
               ) : null}
 
-              {usesExpoUpdates ? (
+              {usesExpoUpdates && enabledTags.includes("expo-updates") ? (
                 <View style={[styles.tag, { backgroundColor: "#007bff" }]}>
                   <Text style={styles.tagText}>Expo Updates</Text>
                 </View>
