@@ -1,3 +1,4 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
 import {
   StyleSheet,
   Text,
@@ -6,17 +7,15 @@ import {
   View,
 } from "react-native";
 
-type ClearableTextInputProps = {
+type Props = {
   value: string;
   onChangeText: (value: string) => void;
   placeholder?: string;
 };
 
-export const ClearableTextInput = ({
-  value,
-  onChangeText,
-  placeholder,
-}: ClearableTextInputProps) => {
+export const ClearableTextInput = (props: Props) => {
+  const { value, onChangeText, placeholder = "Search..." } = props;
+
   return (
     <View style={styles.container}>
       <TextInput
@@ -31,7 +30,7 @@ export const ClearableTextInput = ({
           onPress={() => onChangeText("")}
           style={styles.clearButton}
         >
-          <Text style={styles.clearText}>×</Text>
+          <Ionicons name="close" size={24} color="#888" />
         </TouchableOpacity>
       )}
     </View>
@@ -59,9 +58,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     width: 32,
-  },
-  clearText: {
-    fontSize: 20,
-    color: "#888",
   },
 });
