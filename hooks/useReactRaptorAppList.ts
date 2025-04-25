@@ -58,7 +58,17 @@ export const reactRaptorAppListQueryFn = async () => {
     }
   }
 
-  return combinedResults;
+  return combinedResults.sort((a, b) => {
+    const aName = a.appName.toLowerCase();
+    const bName = b.appName.toLowerCase();
+    if (aName < bName) {
+      return -1;
+    }
+    if (aName > bName) {
+      return 1;
+    }
+    return 0;
+  });
 };
 
 export const useReactRaptorAppList = () => {
