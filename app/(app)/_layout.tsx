@@ -34,6 +34,17 @@ export default function TabLayout() {
           sheetElevation: 4,
         }}
       />
+
+      <Stack.Screen
+        name="disclaimer"
+        options={{
+          presentation: "formSheet",
+          headerShown: false,
+          sheetAllowedDetents: "fitToContents",
+          sheetCornerRadius: 16,
+          sheetElevation: 4,
+        }}
+      />
     </Stack>
   );
 }

@@ -1,6 +1,6 @@
-import { FlatList } from "react-native";
+import { FlatList, StyleSheet } from "react-native";
 import { AppItem } from "@/components/AppItem";
-import { useNavigation } from "expo-router";
+import { Link, useNavigation } from "expo-router";
 import { LoadingApps } from "@/components/LoadingApps";
 import { useSettingsStore } from "@/helpers/settings";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -54,7 +54,22 @@ export default function Index() {
         )}
         keyExtractor={(item) => item.packageName}
         extraData={enabledTags}
+        ListFooterComponent={
+          <Link style={styles.link} href="/disclaimer">
+            Disclaimer
+          </Link>
+        }
       />
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  link: {
+    paddingVertical: 12,
+    color: "#888",
+    textAlign: "center",
+    textDecorationLine: "underline",
+    textDecorationColor: "#888",
+  },
+});
