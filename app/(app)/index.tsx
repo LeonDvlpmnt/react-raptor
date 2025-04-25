@@ -6,11 +6,13 @@ import { useSettingsStore } from "@/helpers/settings";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NoResults } from "@/components/NoResults";
 import { useReactRaptorAppList } from "@/hooks/useReactRaptorAppList";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FilterButton } from "@/components/FilterButton";
+import { ClearableTextInput } from "@/components/ClearableTextInput";
 
 export default function Index() {
   const navigation = useNavigation();
+  const [keyword, setKeyword] = useState<string>("");
 
   const { data, isPending, error } = useReactRaptorAppList();
 
@@ -34,16 +36,25 @@ export default function Index() {
   }
 
   return (
-    <FlatList
-      contentContainerStyle={{
-        paddingBottom: insets.bottom,
-      }}
-      data={data}
-      renderItem={({ item }) => (
-        <AppItem item={item} enabledTags={enabledTags} />
-      )}
-      keyExtractor={(item) => item.packageName}
-      extraData={enabledTags}
-    />
+    <>
+      <ClearableTextInput
+        value={keyword}
+        onChangeText={setKeyword}
+        placeholder="Search..."
+      />
+      <FlatList
+        contentContainerStyle={{
+          paddingBottom: insets.bottom,
+        }}
+        data={data.filter((item) =>
+          item.appName.toLowerCase().includes(keyword.toLowerCase())
+        )}
+        renderItem={({ item }) => (
+          <AppItem item={item} enabledTags={enabledTags} />
+        )}
+        keyExtractor={(item) => item.packageName}
+        extraData={enabledTags}
+      />
+    </>
   );
 }
