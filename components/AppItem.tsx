@@ -1,8 +1,8 @@
 import { Link } from "expo-router";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Image } from "expo-image";
-import Animated from "react-native-reanimated";
 import { ReactRaptorApp } from "@/hooks/useReactRaptorAppList";
+import { Tags } from "./Tags";
 
 type Props = {
   item: ReactRaptorApp;
@@ -11,14 +11,9 @@ type Props = {
 
 export const AppItem = (props: Props) => {
   const {
-    item: { appName, packageName, icon, nativeLibraries, expoConfig },
+    item: { appName, packageName, icon },
     enabledTags = [],
   } = props;
-
-  const probablyNewArchitecture = nativeLibraries.includes("libappmodules.so");
-  const probablyExpo = nativeLibraries.includes("libexpo-modules-core.so");
-  const usesExpoUpdates = expoConfig?.updates?.url !== undefined;
-
   return (
     <Link href={`/${packageName}`} asChild>
       <Pressable>
@@ -35,25 +30,9 @@ export const AppItem = (props: Props) => {
           <View style={styles.infoContainer}>
             <Text style={styles.appName}>{appName}</Text>
             <Text style={styles.packageName}>{packageName}</Text>
-            <View style={styles.tags}>
-              {probablyExpo && enabledTags.includes("expo-modules") ? (
-                <View style={[styles.tag, { backgroundColor: "#000" }]}>
-                  <Text style={styles.tagText}>Expo modules</Text>
-                </View>
-              ) : null}
 
-              {probablyNewArchitecture &&
-              enabledTags.includes("new-architecture") ? (
-                <View style={[styles.tag, { backgroundColor: "#28a745" }]}>
-                  <Text style={styles.tagText}>New Architecture</Text>
-                </View>
-              ) : null}
-
-              {usesExpoUpdates && enabledTags.includes("expo-updates") ? (
-                <View style={[styles.tag, { backgroundColor: "#007bff" }]}>
-                  <Text style={styles.tagText}>Expo Updates</Text>
-                </View>
-              ) : null}
+            <View style={{ marginTop: 5 }}>
+              <Tags item={props.item} enabledTags={enabledTags} />
             </View>
           </View>
         </View>
@@ -96,18 +75,5 @@ const styles = StyleSheet.create({
   author: {
     fontSize: 12,
     color: "#999",
-  },
-  tags: {
-    flexDirection: "row",
-    marginTop: 5,
-    gap: 5,
-  },
-  tag: {
-    padding: 5,
-    borderRadius: 8,
-  },
-  tagText: {
-    color: "#fff",
-    fontSize: 12,
   },
 });

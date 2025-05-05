@@ -17,8 +17,8 @@ export default function Onboarding() {
       />
 
       <Text style={styles.text}>
-        Welcome to ReactRaptor! Discover which of your apps are built with React
-        Native.
+        Welcome to ReactRaptor! Discover which apps on your device are built
+        with React Native.
       </Text>
 
       <TouchableOpacity

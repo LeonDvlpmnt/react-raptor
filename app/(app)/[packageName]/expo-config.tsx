@@ -1,17 +1,24 @@
-import { ReactRaptorApp } from "@/hooks/useReactRaptorAppList";
-import { ScrollView, Text, View } from "react-native";
+import React, { useEffect } from "react";
+import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useReactRaptorApp } from "@/hooks/useReactRaptorApp";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View, Text, ScrollView } from "react-native";
 
-type Props = {
-  app: ReactRaptorApp;
-};
+export default function ExpoConfig() {
+  const { packageName } = useLocalSearchParams<{ packageName: string }>();
+  const { data } = useReactRaptorApp(packageName);
 
-export const ExpoConfigTab = (props: Props) => {
-  const { app } = props;
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: "Expo Config",
+    });
+  }, [navigation]);
 
   const insets = useSafeAreaInsets();
 
-  if (!app.expoConfig) {
+  if (!data?.expoConfig) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text>No Expo config found.</Text>
@@ -30,9 +37,9 @@ export const ExpoConfigTab = (props: Props) => {
         }}
       >
         <Text style={{ fontFamily: "monospace" }}>
-          {JSON.stringify(app.expoConfig, null, 2)}
+          {JSON.stringify(data.expoConfig, null, 2)}
         </Text>
       </ScrollView>
     </ScrollView>
   );
-};
+}

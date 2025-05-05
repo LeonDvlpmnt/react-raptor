@@ -22,6 +22,21 @@ export default function FilterSheet() {
 
       <View style={styles.filterRow}>
         <View style={{ flex: 1 }}>
+          <Text style={styles.filterTitle}>React Native</Text>
+        </View>
+
+        <Switch
+          value={enabledTags.includes("react-native")}
+          onValueChange={() => {
+            toggleTag("react-native");
+          }}
+          thumbColor="#ffffff"
+          trackColor={{ false: "#767577", true: "#E6AF2E" }}
+        />
+      </View>
+
+      <View style={styles.filterRow}>
+        <View style={{ flex: 1 }}>
           <Text style={styles.filterTitle}>Expo Modules</Text>
         </View>
 
@@ -53,9 +68,6 @@ export default function FilterSheet() {
       <View style={styles.filterRow}>
         <View style={{ flex: 1 }}>
           <Text style={styles.filterTitle}>New Architecture</Text>
-          <Text style={styles.filterSubText}>
-            This tag is currently experimental and may not be fully accurate.
-          </Text>
         </View>
 
         <Switch

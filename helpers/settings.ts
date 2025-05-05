@@ -16,7 +16,7 @@ export const useSettingsStore = create<SettingsStore>()(
       setHasFinishedOnboarding: (value) => {
         set({ hasFinishedOnboarding: value });
       },
-      enabledTags: ["expo-modules", "expo-updates"],
+      enabledTags: ["react-native", "expo-modules"],
       toggleTag: (tag) => {
         set((state) => {
           const isTagEnabled = state.enabledTags.includes(tag);

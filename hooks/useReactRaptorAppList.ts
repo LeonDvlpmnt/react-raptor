@@ -32,7 +32,20 @@ export const reactRaptorAppListQueryFn = async () => {
       pkg.packageName
     );
 
-    if (nativeLibraries.some((lib) => reactNativeLibraries.includes(lib))) {
+    // The facebook and instagram apps have a react_native_routes.json file in it's assets folder
+    // This indincates that they are using React Native but are using a custom build
+    // This bypasses the detection method I can use for every other app
+    // That's why I manually add them here and consider them as React Native apps
+    // Checking every app for a react_native_routes.json file is not very efficient
+    const manuallVerifiedApps = [
+      "com.facebook.katana",
+      "com.instagram.android",
+    ];
+
+    if (
+      nativeLibraries.some((lib) => reactNativeLibraries.includes(lib)) ||
+      manuallVerifiedApps.includes(pkg.packageName)
+    ) {
       const [filesResult, iconResult, permissionsResult] =
         await Promise.allSettled([
           ExpoAndroidAppList.getFiles(pkg.packageName, ["assets/app.config"]),
