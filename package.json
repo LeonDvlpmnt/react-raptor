@@ -25,7 +25,6 @@
     "expo-router": "~5.0.5",
     "expo-splash-screen": "~0.30.8",
     "expo-status-bar": "~2.2.3",
-    "expo-updates": "~0.28.12",
     "react": "19.0.0",
     "react-compiler-runtime": "^19.0.0-beta-df7b47d-20241124",
     "react-native": "0.79.2",

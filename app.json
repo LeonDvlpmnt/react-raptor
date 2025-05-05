@@ -39,12 +39,6 @@
       }
     },
     "owner": "leonhh",
-    "updates": {
-      "url": "https://u.expo.dev/829cb782-64f6-43d5-a83b-7a6130b16010"
-    },
-    "runtimeVersion": {
-      "policy": "fingerprint"
-    },
     "ios": {
       "bundleIdentifier": "com.leonhh.reactraptor"
     }
