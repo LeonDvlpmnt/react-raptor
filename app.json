@@ -2,14 +2,14 @@
   "expo": {
     "name": "ReactRaptor",
     "slug": "react-raptor",
-    "version": "2.0.2",
+    "version": "2.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "platforms": ["android"],
     "scheme": "react-raptor",
     "userInterfaceStyle": "automatic",
     "android": {
-      "newArchEnabled": true,
+      "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#191716"
@@ -27,7 +27,6 @@
           "imageWidth": 200
         }
       ],
-      "react-native-edge-to-edge",
       "expo-build-properties"
     ],
     "experiments": {
