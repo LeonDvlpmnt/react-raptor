@@ -60,11 +60,19 @@ export const reactRaptorAppListQueryFn = async () => {
         permissionsResult.status === "fulfilled" ? permissionsResult.value : [];
 
       const config = files?.[0]?.content;
+      let expoConfig: ExpoConfig | undefined = undefined;
+      if (config) {
+        try {
+          expoConfig = JSON.parse(config) as ExpoConfig;
+        } catch (e) {
+          expoConfig = undefined;
+        }
+      }
 
       combinedResults.push({
         ...pkg,
         icon,
-        expoConfig: config ? (JSON.parse(config) as ExpoConfig) : undefined,
+        expoConfig,
         nativeLibraries,
         permissions,
       });
