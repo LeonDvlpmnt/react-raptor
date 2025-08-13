@@ -6,7 +6,8 @@
     "start": "expo start",
     "android": "expo run:android",
     "lint": "expo lint",
-    "ios": "expo run:ios"
+    "ios": "expo run:ios",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.3.0",
@@ -14,41 +15,45 @@
     "@tanstack/react-query": "^5.74.4",
     "babel-plugin-react-compiler": "^19.0.0-beta-df7b47d-20241124",
     "eslint-plugin-react-compiler": "^19.0.0-beta-df7b47d-20241124",
-    "expo": "^54.0.0-canary-20250722-599a28f",
+    "expo": "^54.0.0-preview.0",
     "expo-android-app-list": "1.0.2",
-    "expo-build-properties": "0.15.0-canary-20250722-599a28f",
-    "expo-constants": "17.1.8-canary-20250722-599a28f",
-    "expo-dev-client": "5.1.9-canary-20250722-599a28f",
-    "expo-font": "13.4.0-canary-20250722-599a28f",
-    "expo-image": "2.5.0-canary-20250722-599a28f",
-    "expo-linking": "7.1.8-canary-20250722-599a28f",
-    "expo-router": "5.2.0-canary-20250722-599a28f",
-    "expo-splash-screen": "0.30.11-canary-20250722-599a28f",
-    "expo-status-bar": "2.2.4-canary-20250722-599a28f",
+    "expo-build-properties": "~1.0.0",
+    "expo-constants": "~18.0.0",
+    "expo-dev-client": "~6.0.0",
+    "expo-font": "~14.0.0",
+    "expo-image": "~3.0.0",
+    "expo-linking": "~8.0.0",
+    "expo-router": "~6.0.0-beta.0",
+    "expo-splash-screen": "~31.0.0",
+    "expo-status-bar": "~3.0.0",
+    "patch-package": "^8.0.0",
     "react": "19.1.0",
     "react-compiler-runtime": "^19.0.0-beta-df7b47d-20241124",
-    "react-native": "0.80.1",
-    "react-native-gesture-handler": "~2.26.0",
-    "react-native-mmkv": "^3.2.0",
-    "react-native-reanimated": "~4.0.0",
-    "react-native-worklets": "0.4.0",
-    "react-native-safe-area-context": "5.4.0",
-    "react-native-screens": "~4.11.1",
+    "react-native": "0.81.0",
+    "react-native-gesture-handler": "~2.28.0",
+    "react-native-mmkv": "^3.3.0",
+    "react-native-reanimated": "~4.0.2",
+    "react-native-safe-area-context": "5.6.0",
+    "react-native-screens": "4.14.0",
+    "react-native-worklets": "~0.4.1",
     "zustand": "5.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
-    "@types/react": "~19.1.8",
+    "@types/react": "~19.1.10",
     "eslint": "^8.57.1",
-    "eslint-config-expo": "9.3.0-canary-20250722-599a28f",
+    "eslint-config-expo": "~10.0.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.5",
     "prettier": "^3.4.1",
     "typescript": "~5.8.3"
   },
-  "overrides": {
-    "expo-router": {
-      "vaul": "^1.1.0"
+  "expo": {
+    "install": {
+      "exclude": [
+        "expo",
+        "react-native-screens"
+      ]
     }
   }
 }
