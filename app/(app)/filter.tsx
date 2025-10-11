@@ -4,8 +4,6 @@ import { useSettingsStore } from "@/helpers/settings";
 import { Text, StyleSheet, Switch, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const availableTags = ["expo-modules", "expo-updates", "new-architecture"];
-
 export default function FilterSheet() {
   const insets = useSafeAreaInsets();
 

@@ -2,14 +2,13 @@
   "expo": {
     "name": "ReactRaptor",
     "slug": "react-raptor",
-    "version": "2.0.5",
+    "version": "2.0.6",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "platforms": ["android"],
     "scheme": "react-raptor",
     "userInterfaceStyle": "automatic",
     "android": {
-      "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#191716"
