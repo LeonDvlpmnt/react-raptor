@@ -39,8 +39,6 @@ export default function Details() {
         options={{ headerTitle: data?.appName, headerTitleAlign: "center" }}
       />
 
-      {/* <SystemBars style="light" /> */}
-
       <ScrollView
         style={{}}
         contentContainerStyle={{
