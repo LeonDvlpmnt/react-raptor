@@ -3,12 +3,15 @@
  * Opt-in device smoke: clears logcat, opens react-raptor://__e2e (requires EXPO_PUBLIC_E2E=1 build),
  * waits for REACT_RAPTOR_DETECTION_JSON in logcat, validates payload, prints SUMMARY.
  *
- * Env: ANDROID_SERIAL (optional), ANDROID_PACKAGE (default com.leonhh.reactraptor), ANDROID_APK optional
+ * Env: ANDROID_SERIAL (optional), ANDROID_PACKAGE (default com.leonhh.reactraptor),
+ * ANDROID_MAIN_ACTIVITY (default $ANDROID_PACKAGE/.MainActivity), ANDROID_APK optional
  */
 
 import { execFileSync } from "node:child_process";
 
 const PKG = process.env.ANDROID_PACKAGE || "com.leonhh.reactraptor";
+const MAIN_ACTIVITY =
+  process.env.ANDROID_MAIN_ACTIVITY || `${PKG}/.MainActivity`;
 const TIMEOUT_MS = Number(process.env.DETECTION_SMOKE_TIMEOUT_MS || 120000);
 const POLL_MS = 2000;
 
@@ -19,6 +22,30 @@ function adb(args) {
     encoding: "utf8",
     maxBuffer: 20 * 1024 * 1024,
   });
+}
+
+function assertPackageInstalled() {
+  try {
+    const out = adb(["shell", "pm", "path", PKG]);
+    if (out.includes("package:")) return;
+  } catch {
+    // pm path exits 1 when the package is missing
+  }
+  console.error(
+    [
+      `Android package "${PKG}" is not installed on the connected device.`,
+      "",
+      "The adb smoke test opens react-raptor://__e2e in that app and reads",
+      "REACT_RAPTOR_DETECTION_JSON from logcat. Install an E2E-enabled build first:",
+      "",
+      "  cd react-raptor",
+      "  EXPO_PUBLIC_E2E=1 npx expo run:android",
+      "",
+      "Optional: ANDROID_SERIAL=emulator-5554  ANDROID_APK=/path/to.apk",
+      "",
+    ].join("\n"),
+  );
+  process.exit(2);
 }
 
 function parsePayloadFromLog(log) {
@@ -69,6 +96,8 @@ async function main() {
     process.exit(1);
   }
 
+  assertPackageInstalled();
+
   const apk = process.env.ANDROID_APK;
   if (apk) {
     console.error("Installing", apk);
@@ -87,11 +116,12 @@ async function main() {
     "am",
     "start",
     "-W",
+    "-n",
+    MAIN_ACTIVITY,
     "-a",
     "android.intent.action.VIEW",
     "-d",
     "react-raptor://__e2e",
-    PKG,
   ]);
 
   const deadline = Date.now() + TIMEOUT_MS;

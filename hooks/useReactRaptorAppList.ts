@@ -6,6 +6,7 @@ import {
 import { ExpoConfig } from "@expo/config-types";
 import {
   CORDOVA_CAPACITOR_PROBE_PATHS,
+  REACT_NATIVE_ASSET_PROBE_PATHS,
   classifyStageOne,
   dotnetAssemblyProbePaths,
   finalizeAfterHybridProbe,
@@ -86,17 +87,26 @@ export const reactRaptorAppListQueryFn = async (): Promise<
       });
       dotnetSubtype = resolveDotnetSubtypeFromFileHits(map);
     } else {
-      let hybrid = false;
-      if (shouldProbeCordovaCapacitor(nativeLibraries)) {
-        const cordovaHits = await ExpoAndroidAppList.hasZipEntries(
-          pkg.packageName,
-          CORDOVA_CAPACITOR_PROBE_PATHS,
-        );
-        hybrid = cordovaHits.some(Boolean);
+      const rnAssetHits = await ExpoAndroidAppList.hasZipEntries(
+        pkg.packageName,
+        [...REACT_NATIVE_ASSET_PROBE_PATHS],
+      );
+      if (rnAssetHits.some(Boolean)) {
+        primaryFramework = "react-native";
+        frameworkSignals.push("assets/index.android.bundle");
+      } else {
+        let hybrid = false;
+        if (shouldProbeCordovaCapacitor(nativeLibraries)) {
+          const cordovaHits = await ExpoAndroidAppList.hasZipEntries(
+            pkg.packageName,
+            CORDOVA_CAPACITOR_PROBE_PATHS,
+          );
+          hybrid = cordovaHits.some(Boolean);
+        }
+        const fin = finalizeAfterHybridProbe(nativeLibraries, hybrid);
+        primaryFramework = fin.primaryFramework;
+        frameworkSignals.push(...fin.frameworkSignals);
       }
-      const fin = finalizeAfterHybridProbe(nativeLibraries, hybrid);
-      primaryFramework = fin.primaryFramework;
-      frameworkSignals.push(...fin.frameworkSignals);
     }
 
     const sdkHints = inferSdkHintsTierA(nativeLibraries);

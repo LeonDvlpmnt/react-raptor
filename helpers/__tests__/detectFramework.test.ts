@@ -43,6 +43,32 @@ describe("classifyStageOne", () => {
       expect(r.primaryFramework).toBe("react-native");
   });
 
+  it("detects React Native via merged .so names", () => {
+    const r = classifyStageOne("com.example.app", [
+      "libreactnativeblob.so",
+    ]);
+    expect(r.kind).toBe("resolved");
+    if (r.kind === "resolved")
+      expect(r.primaryFramework).toBe("react-native");
+  });
+
+  it("detects React Native via New Architecture instance .so", () => {
+    const r = classifyStageOne("com.example.app", ["librninstance.so"]);
+    expect(r.kind).toBe("resolved");
+    if (r.kind === "resolved")
+      expect(r.primaryFramework).toBe("react-native");
+  });
+
+  it("detects React Native via Hermes + JSI stack", () => {
+    const r = classifyStageOne("com.example.app", [
+      "libhermes.so",
+      "libjsi.so",
+    ]);
+    expect(r.kind).toBe("resolved");
+    if (r.kind === "resolved")
+      expect(r.primaryFramework).toBe("react-native");
+  });
+
   it("detects manual Meta packages as React Native", () => {
     const r = classifyStageOne("com.facebook.katana", []);
     expect(r.kind).toBe("resolved");

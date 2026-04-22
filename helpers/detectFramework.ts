@@ -19,6 +19,13 @@ export const REACT_NATIVE_LIBRARIES = [
   "libreactnativejni.so",
   "libreactnative.so",
   "libjsijniprofiler.so",
+  "librninstance.so",
+  "libjscexecutor.so",
+] as const;
+
+/** Android RN apps ship the JS bundle here (Hermes bytecode uses the same path). */
+export const REACT_NATIVE_ASSET_PROBE_PATHS = [
+  "assets/index.android.bundle",
 ] as const;
 
 export const MANUAL_REACT_NATIVE_PACKAGES = new Set([
@@ -90,9 +97,25 @@ function isKmpSkiko(libs: string[]): boolean {
 }
 
 function isReactNativeLibs(libs: string[]): boolean {
-  return libs.some((l) =>
-    (REACT_NATIVE_LIBRARIES as readonly string[]).includes(l)
-  );
+  if (
+    libs.some((l) =>
+      (REACT_NATIVE_LIBRARIES as readonly string[]).includes(l),
+    )
+  ) {
+    return true;
+  }
+  const lower = libs.map((l) => l.toLowerCase());
+  // New Architecture / merged artifacts often include "reactnative" in the .so file name.
+  if (lower.some((l) => l.includes("reactnative"))) {
+    return true;
+  }
+  // Hermes + JSI is the standard RN native stack (avoids tagging Hermes-only shells).
+  const hasHermes = lower.some((l) => l.includes("hermes"));
+  const hasJsi = lower.some((l) => l === "libjsi.so" || l.startsWith("libjsi."));
+  if (hasHermes && hasJsi) {
+    return true;
+  }
+  return false;
 }
 
 /**

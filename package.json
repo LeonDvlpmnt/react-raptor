@@ -4,7 +4,9 @@
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
+    "start:emu": "expo start --localhost",
     "android": "expo run:android",
+    "android:emu": "REACT_NATIVE_PACKAGER_HOSTNAME=127.0.0.1 expo run:android",
     "prebuild": "expo prebuild --platform android",
     "lint": "expo lint",
     "ios": "expo run:ios",
