@@ -17,8 +17,11 @@ export default function Onboarding() {
       />
 
       <Text style={styles.text}>
-        Welcome to ReactRaptor! Discover which apps on your device are built
-        with React Native.
+        Welcome to ReactRaptor! Scan installed apps on your device for
+        frameworks such as React Native, Flutter, .NET (including MAUI),
+        NativeScript, Kotlin Multiplatform (Compose Multiplatform when
+        detectable), and more. JVM-only Kotlin Multiplatform without Skiko may
+        appear as generic native apps.
       </Text>
 
       <TouchableOpacity

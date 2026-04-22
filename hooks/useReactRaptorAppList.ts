@@ -4,92 +4,152 @@ import {
   ExpoAndroidAppList,
 } from "expo-android-app-list";
 import { ExpoConfig } from "@expo/config-types";
+import {
+  CORDOVA_CAPACITOR_PROBE_PATHS,
+  classifyStageOne,
+  dotnetAssemblyProbePaths,
+  finalizeAfterHybridProbe,
+  resolveDotnetSubtypeFromFileHits,
+  shouldProbeCordovaCapacitor,
+  type DotnetSubtype,
+  type FrameworkKind,
+  type KmpSubtype,
+} from "@/helpers/detectFramework";
+import { inferSdkHintsTierA, type SdkHint } from "@/helpers/inferSdkHints";
 
-const reactNativeLibraries = [
-  "libreactnativejni.so",
-  "libreactnative.so",
-  "libjsijniprofiler.so",
-];
+const ICON_PERM_CONCURRENCY = 12;
+
+async function mapInChunks<T>(
+  items: T[],
+  concurrency: number,
+  fn: (item: T, index: number) => Promise<void>,
+): Promise<void> {
+  for (let i = 0; i < items.length; i += concurrency) {
+    const slice = items.slice(i, i + concurrency);
+    await Promise.all(slice.map((item, j) => fn(item, i + j)));
+  }
+}
 
 export type ReactRaptorApp = AndroidAppListPackage & {
   icon: string;
   nativeLibraries: string[];
   expoConfig?: ExpoConfig;
   permissions: string[];
+  primaryFramework: FrameworkKind;
+  dotnetSubtype?: DotnetSubtype;
+  kmpSubtype?: KmpSubtype;
+  frameworkSignals: string[];
+  sdkHints: SdkHint[];
 };
 
-export const reactRaptorAppListQueryFn = async () => {
-  const combinedResults: ReactRaptorApp[] = [];
+type MutableRow = Omit<
+  ReactRaptorApp,
+  "icon" | "permissions" | "expoConfig"
+> & {
+  icon: string;
+  permissions: string[];
+  expoConfig?: ExpoConfig;
+};
 
-  const result = await ExpoAndroidAppList.getAll();
+export const reactRaptorAppListQueryFn = async (): Promise<
+  ReactRaptorApp[]
+> => {
+  const all = await ExpoAndroidAppList.getAll();
+  const nonSystem = all.filter((p) => !p.isSystemApp);
 
-  for (const pkg of result) {
-    if (pkg.isSystemApp) {
-      continue;
-    }
+  const mutableRows: MutableRow[] = [];
 
+  for (const pkg of nonSystem) {
     const nativeLibraries = await ExpoAndroidAppList.getNativeLibraries(
-      pkg.packageName
+      pkg.packageName,
     );
 
-    // The facebook and instagram apps have a react_native_routes.json file in it's assets folder
-    // This indincates that they are using React Native but are using a custom build
-    // This bypasses the detection method I can use for every other app
-    // That's why I manually add them here and consider them as React Native apps
-    // Checking every app for a react_native_routes.json file is not very efficient
-    const manuallVerifiedApps = [
-      "com.facebook.katana",
-      "com.instagram.android",
-    ];
+    const stage = classifyStageOne(pkg.packageName, nativeLibraries);
+    let primaryFramework: FrameworkKind;
+    let dotnetSubtype: DotnetSubtype | undefined;
+    let kmpSubtype: KmpSubtype | undefined;
+    const frameworkSignals = [...stage.frameworkSignals];
 
-    if (
-      nativeLibraries.some((lib) => reactNativeLibraries.includes(lib)) ||
-      manuallVerifiedApps.includes(pkg.packageName)
-    ) {
-      const [filesResult, iconResult, permissionsResult] =
-        await Promise.allSettled([
-          ExpoAndroidAppList.getFiles(pkg.packageName, ["assets/app.config"]),
-          ExpoAndroidAppList.getAppIcon(pkg.packageName),
-          ExpoAndroidAppList.getPermissions(pkg.packageName),
-        ]);
-
-      const files =
-        filesResult.status === "fulfilled" ? filesResult.value : undefined;
-      const icon = iconResult.status === "fulfilled" ? iconResult.value : "";
-      const permissions =
-        permissionsResult.status === "fulfilled" ? permissionsResult.value : [];
-
-      const config = files?.[0]?.content;
-      let expoConfig: ExpoConfig | undefined = undefined;
-      if (config) {
-        try {
-          expoConfig = JSON.parse(config) as ExpoConfig;
-        } catch (e) {
-          expoConfig = undefined;
-        }
-      }
-
-      combinedResults.push({
-        ...pkg,
-        icon,
-        expoConfig,
-        nativeLibraries,
-        permissions,
+    if (stage.kind === "resolved") {
+      primaryFramework = stage.primaryFramework;
+      kmpSubtype = stage.kmpSubtype;
+    } else if (stage.kind === "dotnet") {
+      primaryFramework = "dotnet";
+      const probePaths = dotnetAssemblyProbePaths();
+      const hits = await ExpoAndroidAppList.hasZipEntries(
+        pkg.packageName,
+        probePaths,
+      );
+      const map: Record<string, boolean> = {};
+      probePaths.forEach((p, i) => {
+        map[p] = Boolean(hits[i]);
       });
+      dotnetSubtype = resolveDotnetSubtypeFromFileHits(map);
+    } else {
+      let hybrid = false;
+      if (shouldProbeCordovaCapacitor(nativeLibraries)) {
+        const cordovaHits = await ExpoAndroidAppList.hasZipEntries(
+          pkg.packageName,
+          CORDOVA_CAPACITOR_PROBE_PATHS,
+        );
+        hybrid = cordovaHits.some(Boolean);
+      }
+      const fin = finalizeAfterHybridProbe(nativeLibraries, hybrid);
+      primaryFramework = fin.primaryFramework;
+      frameworkSignals.push(...fin.frameworkSignals);
     }
+
+    const sdkHints = inferSdkHintsTierA(nativeLibraries);
+
+    mutableRows.push({
+      ...pkg,
+      nativeLibraries,
+      primaryFramework,
+      dotnetSubtype,
+      kmpSubtype,
+      frameworkSignals: [...new Set(frameworkSignals)].slice(0, 24),
+      sdkHints,
+      icon: "",
+      permissions: [],
+    });
   }
 
-  return combinedResults.sort((a, b) => {
-    const aName = a.appName.toLowerCase();
-    const bName = b.appName.toLowerCase();
-    if (aName < bName) {
-      return -1;
-    }
-    if (aName > bName) {
-      return 1;
-    }
-    return 0;
+  await mapInChunks(mutableRows, ICON_PERM_CONCURRENCY, async (row) => {
+    const [iconRes, permRes] = await Promise.allSettled([
+      ExpoAndroidAppList.getAppIcon(row.packageName),
+      ExpoAndroidAppList.getPermissions(row.packageName),
+    ]);
+    row.icon =
+      iconRes.status === "fulfilled" && iconRes.value
+        ? String(iconRes.value)
+        : "";
+    row.permissions =
+      permRes.status === "fulfilled" && Array.isArray(permRes.value)
+        ? permRes.value
+        : [];
   });
+
+  await mapInChunks(
+    mutableRows.filter((r) => r.primaryFramework === "react-native"),
+    ICON_PERM_CONCURRENCY,
+    async (row) => {
+      const filesResult = await ExpoAndroidAppList.getFiles(row.packageName, [
+        "assets/app.config",
+      ]);
+      const content = filesResult?.[0]?.content;
+      if (content) {
+        try {
+          row.expoConfig = JSON.parse(content) as ExpoConfig;
+        } catch {
+          row.expoConfig = undefined;
+        }
+      }
+    },
+  );
+
+  return mutableRows.sort((a, b) =>
+    a.appName.toLowerCase().localeCompare(b.appName.toLowerCase()),
+  );
 };
 
 export const useReactRaptorAppList = () => {

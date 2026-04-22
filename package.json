@@ -8,7 +8,10 @@
     "prebuild": "expo prebuild --platform android",
     "lint": "expo lint",
     "ios": "expo run:ios",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package && node scripts/ensure-android-app-list-built.mjs",
+    "test": "jest",
+    "test:adb-detection": "RUN_ADB_DETECTION=1 jest e2e/detection.adb.test.ts",
+    "detection-adb-smoke": "node scripts/detection-adb-smoke.mjs"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
@@ -17,7 +20,7 @@
     "babel-plugin-react-compiler": "^1.0.0",
     "eslint-plugin-react-compiler": "^19.1.0-rc.2",
     "expo": "^54.0.13",
-    "expo-android-app-list": "1.1.0",
+    "expo-android-app-list": "file:../android-app-list",
     "expo-build-properties": "~1.0.9",
     "expo-constants": "~18.0.3",
     "expo-dev-client": "~6.0.15",
@@ -41,12 +44,15 @@
     "zustand": "5.0.3"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.14",
     "@types/react": "~19.1.10",
     "eslint": "^8.57.1",
     "eslint-config-expo": "~10.0.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.5",
+    "jest": "^29.7.0",
     "prettier": "^3.4.1",
+    "ts-jest": "^29.2.5",
     "typescript": "~5.9.2"
   }
 }

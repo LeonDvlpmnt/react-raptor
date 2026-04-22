@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
 import {
   Linking,
@@ -14,22 +14,87 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Tags } from "@/components/Tags";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Image } from "expo-image";
+import {
+  dotnetSubtypeLabel,
+  frameworkDisplayName,
+  kmpSubtypeLabel,
+} from "@/helpers/detectFramework";
+import { ExpoAndroidAppList } from "expo-android-app-list";
+import {
+  inferSdkHintsTierB,
+  TIER_B_BACKEND_ZIP_PATHS,
+  type SdkHint,
+} from "@/helpers/inferSdkHints";
+import { useSettingsStore } from "@/helpers/settings";
 
 export default function Details() {
   const { packageName } = useLocalSearchParams<{ packageName: string }>();
   const { data } = useReactRaptorApp(packageName);
+  const { deepSdkScan } = useSettingsStore();
 
   const insets = useSafeAreaInsets();
 
   const [showNativeLibraries, setShowNativeLibraries] = useState(false);
   const [showPermissions, setShowPermissions] = useState(false);
+  const [mergedSdkHints, setMergedSdkHints] = useState<SdkHint[]>([]);
+
+  useEffect(() => {
+    if (!data) return;
+    setMergedSdkHints(data.sdkHints);
+    if (!deepSdkScan) return;
+    let cancelled = false;
+    (async () => {
+      const pres = await ExpoAndroidAppList.hasZipEntries(
+        packageName,
+        TIER_B_BACKEND_ZIP_PATHS,
+      );
+      const zipPresence = Object.fromEntries(
+        TIER_B_BACKEND_ZIP_PATHS.map((p, i) => [p, Boolean(pres[i])]),
+      );
+      let capacitorConfigRaw: string | null = null;
+      if (data.primaryFramework === "cordova-capacitor") {
+        const fc = await ExpoAndroidAppList.getFiles(packageName, [
+          "capacitor.config.json",
+          "assets/capacitor.config.json",
+        ]);
+        capacitorConfigRaw =
+          fc.find((f) => f?.content && f.content.length > 0)?.content ?? null;
+      }
+      const tierB = inferSdkHintsTierB({
+        primaryFramework: data.primaryFramework,
+        zipPresence,
+        expoConfigRaw: data.expoConfig
+          ? JSON.stringify(data.expoConfig)
+          : undefined,
+        capacitorConfigRaw: capacitorConfigRaw ?? undefined,
+      });
+      const merged = [...data.sdkHints, ...tierB];
+      const dedup = new Map<string, SdkHint>();
+      merged.forEach((h) => {
+        if (!dedup.has(h.id)) dedup.set(h.id, h);
+      });
+      if (!cancelled) setMergedSdkHints([...dedup.values()]);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [data, packageName, deepSdkScan]);
 
   if (!data) {
     return null;
   }
 
-  const { nativeLibraries, icon, size, versionName, expoConfig, permissions } =
-    data;
+  const {
+    nativeLibraries,
+    icon,
+    size,
+    versionName,
+    expoConfig,
+    permissions,
+    primaryFramework,
+    dotnetSubtype,
+    kmpSubtype,
+  } = data;
 
   const playStoreLink = `https://play.google.com/store/apps/details?id=${packageName}`;
 
@@ -77,6 +142,28 @@ export default function Details() {
 
           <View style={styles.separator} />
 
+          <View style={styles.item}>
+            <Text style={styles.itemTitle}>Primary framework</Text>
+            <Text style={styles.itemText}>
+              {frameworkDisplayName(primaryFramework)}
+              {primaryFramework === "dotnet" && dotnetSubtype
+                ? ` — ${dotnetSubtypeLabel(dotnetSubtype)}`
+                : ""}
+              {primaryFramework === "kotlin-multiplatform" && kmpSubtype
+                ? ` — ${kmpSubtypeLabel(kmpSubtype)}`
+                : ""}
+            </Text>
+            {primaryFramework === "kotlin-multiplatform" ? (
+              <Text style={[styles.itemText, { marginTop: 6, fontSize: 13 }]}>
+                Kotlin Multiplatform is only inferred when Compose Multiplatform
+                / Skiko-style native libraries are present. Shared-logic-only
+                KMP on Android may appear as Native.
+              </Text>
+            ) : null}
+          </View>
+
+          <View style={styles.separator} />
+
           <View style={styles.row}>
             {size ? (
               <View style={styles.item}>
@@ -93,13 +180,35 @@ export default function Details() {
             </View>
           </View>
 
+          {primaryFramework === "react-native" ? (
+            <>
+              <View style={styles.separator} />
+              <View style={styles.item}>
+                <Text style={styles.itemTitle}>Expo version</Text>
+                <Text style={styles.itemText}>
+                  {expoConfig?.sdkVersion ?? "N/A"}
+                </Text>
+              </View>
+            </>
+          ) : null}
+
           <View style={styles.separator} />
 
           <View style={styles.item}>
-            <Text style={styles.itemTitle}>Expo version</Text>
-            <Text style={styles.itemText}>
-              {expoConfig?.sdkVersion ?? "N/A"}
+            <Text style={styles.itemTitle}>Possible SDKs & services</Text>
+            <Text style={[styles.itemText, { marginBottom: 8, fontSize: 13 }]}>
+              Heuristic signals only — not a security audit. No secrets are
+              shown.
             </Text>
+            {mergedSdkHints.length === 0 ? (
+              <Text style={styles.itemText}>None detected from this scan.</Text>
+            ) : (
+              mergedSdkHints.map((h) => (
+                <Text key={h.id} style={styles.itemText}>
+                  • {h.id} ({h.kind}, {h.confidence}, {h.source})
+                </Text>
+              ))
+            )}
           </View>
 
           <View style={styles.separator} />

@@ -2,10 +2,24 @@ import { ScrollView, Text, View, StyleSheet } from "react-native";
 
 type Props = {
   errorMessage?: string;
+  /** When list is empty because filters hide every row */
+  filterEmpty?: boolean;
 };
 
 export const NoResults = (props: Props) => {
-  const { errorMessage } = props;
+  const { errorMessage, filterEmpty } = props;
+
+  const title = filterEmpty
+    ? "No apps match your filters"
+    : errorMessage
+      ? "Something went wrong"
+      : "No apps to show";
+
+  const subtitle = filterEmpty
+    ? "Try widening framework filters in the header menu."
+    : errorMessage
+      ? errorMessage
+      : "No non-system apps were returned, or the scan failed.";
 
   return (
     <ScrollView
@@ -14,13 +28,11 @@ export const NoResults = (props: Props) => {
         gap: 10,
       }}
     >
-      <Text style={styles.title}>No React Native apps found</Text>
+      <Text style={styles.title}>{title}</Text>
 
-      {errorMessage ? (
-        <View style={styles.textContainer}>
-          <Text style={[styles.text, { fontSize: 12 }]}>{errorMessage}</Text>
-        </View>
-      ) : null}
+      <View style={styles.textContainer}>
+        <Text style={styles.text}>{subtitle}</Text>
+      </View>
     </ScrollView>
   );
 };
