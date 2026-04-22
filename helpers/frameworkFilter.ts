@@ -15,6 +15,7 @@ export const FRAMEWORK_FILTER_OPTIONS: {
   { key: "kotlin-multiplatform", label: "Kotlin Multiplatform" },
   { key: "react-native", label: "React Native" },
   { key: "cordova-capacitor", label: "Cordova / Capacitor" },
+  { key: "pwa", label: "Chrome WebAPK (PWA)" },
   { key: "native", label: "Native (JNI)" },
   { key: "other", label: "Other" },
 ];

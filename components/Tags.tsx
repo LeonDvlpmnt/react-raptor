@@ -20,6 +20,7 @@ const FW_COLORS: Record<string, string> = {
   "kotlin-multiplatform": "#7F52FF",
   "react-native": "#087ea4",
   "cordova-capacitor": "#2196f3",
+  pwa: "#4285F4",
   native: "#607d8b",
   other: "#9e9e9e",
 };

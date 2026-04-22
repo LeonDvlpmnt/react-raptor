@@ -6,6 +6,7 @@ import {
 import { ExpoConfig } from "@expo/config-types";
 import {
   CORDOVA_CAPACITOR_PROBE_PATHS,
+  PWA_ASSET_PROBE_PATHS,
   REACT_NATIVE_ASSET_PROBE_PATHS,
   classifyStageOne,
   dotnetAssemblyProbePaths,
@@ -80,6 +81,7 @@ export const reactRaptorAppListQueryFn = async (): Promise<
       const hits = await ExpoAndroidAppList.hasZipEntries(
         pkg.packageName,
         probePaths,
+        false,
       );
       const map: Record<string, boolean> = {};
       probePaths.forEach((p, i) => {
@@ -90,6 +92,7 @@ export const reactRaptorAppListQueryFn = async (): Promise<
       const rnAssetHits = await ExpoAndroidAppList.hasZipEntries(
         pkg.packageName,
         [...REACT_NATIVE_ASSET_PROBE_PATHS],
+        true,
       );
       if (rnAssetHits.some(Boolean)) {
         primaryFramework = "react-native";
@@ -97,17 +100,30 @@ export const reactRaptorAppListQueryFn = async (): Promise<
         const path = [...REACT_NATIVE_ASSET_PROBE_PATHS][i] ?? "rn-asset";
         frameworkSignals.push(`apk:${path}`);
       } else {
-        let hybrid = false;
-        if (shouldProbeCordovaCapacitor(nativeLibraries)) {
-          const cordovaHits = await ExpoAndroidAppList.hasZipEntries(
-            pkg.packageName,
-            CORDOVA_CAPACITOR_PROBE_PATHS,
-          );
-          hybrid = cordovaHits.some(Boolean);
+        const pwaAssetHits = await ExpoAndroidAppList.hasZipEntries(
+          pkg.packageName,
+          [...PWA_ASSET_PROBE_PATHS],
+          true,
+        );
+        if (pwaAssetHits.some(Boolean)) {
+          primaryFramework = "pwa";
+          const j = pwaAssetHits.findIndex(Boolean);
+          const pPath = [...PWA_ASSET_PROBE_PATHS][j] ?? "pwa-asset";
+          frameworkSignals.push(`apk:${pPath}`);
+        } else {
+          let hybrid = false;
+          if (shouldProbeCordovaCapacitor(nativeLibraries)) {
+            const cordovaHits = await ExpoAndroidAppList.hasZipEntries(
+              pkg.packageName,
+              [...CORDOVA_CAPACITOR_PROBE_PATHS],
+              true,
+            );
+            hybrid = cordovaHits.some(Boolean);
+          }
+          const fin = finalizeAfterHybridProbe(nativeLibraries, hybrid);
+          primaryFramework = fin.primaryFramework;
+          frameworkSignals.push(...fin.frameworkSignals);
         }
-        const fin = finalizeAfterHybridProbe(nativeLibraries, hybrid);
-        primaryFramework = fin.primaryFramework;
-        frameworkSignals.push(...fin.frameworkSignals);
       }
     }
 

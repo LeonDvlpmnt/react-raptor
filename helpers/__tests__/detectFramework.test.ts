@@ -3,10 +3,31 @@ import {
   classifyStageOne,
   dotnetAssemblyProbePaths,
   finalizeAfterHybridProbe,
+  isChromeWebApkPackageId,
   resolveDotnetSubtypeFromFileHits,
 } from "@/helpers/detectFramework";
 
+describe("isChromeWebApkPackageId", () => {
+  it("matches Chrome-installed PWA (WebAPK) package prefix", () => {
+    expect(isChromeWebApkPackageId("org.chromium.webapk.a1b2c3d4")).toBe(true);
+    expect(isChromeWebApkPackageId("ORG.CHROMIUM.WEBAPK.X")).toBe(true);
+  });
+
+  it("does not match the Chrome browser or arbitrary apps", () => {
+    expect(isChromeWebApkPackageId("com.android.chrome")).toBe(false);
+    expect(isChromeWebApkPackageId("com.example.app")).toBe(false);
+  });
+});
+
 describe("classifyStageOne", () => {
+  it("detects Chrome WebAPK by package id before other stacks", () => {
+    const r = classifyStageOne("org.chromium.webapk.a1b2c3d4e5f67890", [
+      "libflutter.so",
+    ]);
+    expect(r.kind).toBe("resolved");
+    if (r.kind === "resolved") expect(r.primaryFramework).toBe("pwa");
+  });
+
   it("detects Flutter", () => {
     const r = classifyStageOne("com.example.app", ["libflutter.so"]);
     expect(r.kind).toBe("resolved");

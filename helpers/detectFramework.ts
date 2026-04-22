@@ -8,6 +8,7 @@ export type FrameworkKind =
   | "kotlin-multiplatform"
   | "react-native"
   | "cordova-capacitor"
+  | "pwa"
   | "native"
   | "other";
 
@@ -65,7 +66,28 @@ export const CORDOVA_CAPACITOR_PROBE_PATHS = [
   "assets/capacitor.config.json",
 ];
 
+/**
+ * Trusted Web Activity / Bubblewrap-style shells (non–WebAPK package ids).
+ * Matched with exact zip paths only (see hasZipEntries exactMatch).
+ */
+export const PWA_ASSET_PROBE_PATHS = [
+  "res/raw/twa-manifest.json",
+  "res/raw/twa_manifest.json",
+  "assets/twa-manifest.json",
+  "assets/twa_manifest.json",
+] as const;
+
 const LARGE_NATIVE_LIB_COUNT_SKIP_HYBRID = 120;
+
+/**
+ * Chrome (and Chromium builds that use Chrome’s WebAPK pipeline) assign each
+ * **installed PWA** a synthetic Android package `org.chromium.webapk.<token>`.
+ * This is **not** the Chrome browser (`com.android.chrome`, etc.) and not other
+ * Chromium-based browsers unless they reuse the same WebAPK mechanism.
+ */
+export function isChromeWebApkPackageId(packageName: string): boolean {
+  return packageName.toLowerCase().startsWith("org.chromium.webapk");
+}
 
 export type StageOneResult =
   | {
@@ -146,6 +168,14 @@ export function classifyStageOne(
   const libs = nativeLibraries
     .map((l) => String(l).trim())
     .filter((l) => l.length > 0);
+
+  if (isChromeWebApkPackageId(packageName)) {
+    return {
+      kind: "resolved",
+      primaryFramework: "pwa",
+      frameworkSignals: ["org.chromium.webapk"],
+    };
+  }
 
   if (hasExactLib(libs, "libflutter.so")) {
     frameworkSignals.push("libflutter.so");
@@ -280,6 +310,7 @@ const FRAMEWORK_LABELS: Record<FrameworkKind, string> = {
   "kotlin-multiplatform": "Kotlin Multiplatform",
   "react-native": "React Native",
   "cordova-capacitor": "Cordova / Capacitor",
+  pwa: "Chrome WebAPK (PWA)",
   native: "Native (JNI)",
   other: "Other",
 };

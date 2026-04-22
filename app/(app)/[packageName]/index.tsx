@@ -47,6 +47,7 @@ export default function Details() {
       const pres = await ExpoAndroidAppList.hasZipEntries(
         packageName,
         TIER_B_BACKEND_ZIP_PATHS,
+        false,
       );
       const zipPresence = Object.fromEntries(
         TIER_B_BACKEND_ZIP_PATHS.map((p, i) => [p, Boolean(pres[i])]),
