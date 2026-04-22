@@ -93,7 +93,9 @@ export const reactRaptorAppListQueryFn = async (): Promise<
       );
       if (rnAssetHits.some(Boolean)) {
         primaryFramework = "react-native";
-        frameworkSignals.push("assets/index.android.bundle");
+        const i = rnAssetHits.findIndex(Boolean);
+        const path = [...REACT_NATIVE_ASSET_PROBE_PATHS][i] ?? "rn-asset";
+        frameworkSignals.push(`apk:${path}`);
       } else {
         let hybrid = false;
         if (shouldProbeCordovaCapacitor(nativeLibraries)) {
@@ -165,7 +167,8 @@ export const reactRaptorAppListQueryFn = async (): Promise<
 export const useReactRaptorAppList = () => {
   const query = useQuery({
     queryKey: ["packages"],
-    staleTime: 1000 * 60 * 5,
+    // Classification logic changes often during development; avoid long-lived stale scans.
+    staleTime: 1000 * 30,
     queryFn: reactRaptorAppListQueryFn,
   });
 

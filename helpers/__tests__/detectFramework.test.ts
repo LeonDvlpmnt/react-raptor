@@ -18,6 +18,27 @@ describe("classifyStageOne", () => {
     expect(r.kind).toBe("dotnet");
   });
 
+  it("does not treat libmonochrome as dotnet", () => {
+    const r = classifyStageOne("com.example.app", ["libmonochrome.so"]);
+    expect(r.kind).toBe("needs_hybrid_probe");
+  });
+
+  it("detects React Native via Expo native module .so", () => {
+    const r = classifyStageOne("com.example.app", ["libexpo-modules-core.so"]);
+    expect(r.kind).toBe("resolved");
+    if (r.kind === "resolved")
+      expect(r.primaryFramework).toBe("react-native");
+  });
+
+  it("detects React Native via react_codegen JNI", () => {
+    const r = classifyStageOne("com.example.app", [
+      "libreact_codegen_rnscreens.so",
+    ]);
+    expect(r.kind).toBe("resolved");
+    if (r.kind === "resolved")
+      expect(r.primaryFramework).toBe("react-native");
+  });
+
   it("detects NativeScript", () => {
     const r = classifyStageOne("com.example.app", ["libNativeScript.so"]);
     expect(r.kind).toBe("resolved");

@@ -23,9 +23,14 @@ export const REACT_NATIVE_LIBRARIES = [
   "libjscexecutor.so",
 ] as const;
 
-/** Android RN apps ship the JS bundle here (Hermes bytecode uses the same path). */
+/**
+ * APK paths that strongly indicate React Native / Expo when stage-one JNI
+ * heuristics miss (e.g. unextracted libs, ABI splits, odd .so naming).
+ * `assets/app.config` is the embedded Expo config on managed / prebuild apps.
+ */
 export const REACT_NATIVE_ASSET_PROBE_PATHS = [
   "assets/index.android.bundle",
+  "assets/app.config",
 ] as const;
 
 export const MANUAL_REACT_NATIVE_PACKAGES = new Set([
@@ -83,13 +88,17 @@ function hasExactLib(libs: string[], name: string): boolean {
   return libs.includes(name);
 }
 
+/** True Xamarin/Mono .NET Android artifacts — avoid `libmono*` (e.g. libmonochrome). */
 function isDotnetStack(libs: string[]): boolean {
-  return libs.some(
-    (l) =>
-      DOTNET_NATIVE_LIBS.has(l) ||
-      l.startsWith("libmono") ||
-      l.includes("libmonosgen")
-  );
+  return libs.some((l) => {
+    if (DOTNET_NATIVE_LIBS.has(l)) return true;
+    const lower = l.toLowerCase();
+    if (lower.includes("monosgen") || lower.includes("monodroid")) return true;
+    if (lower.startsWith("libmono-native") || lower.startsWith("libmono-btls"))
+      return true;
+    if (lower.startsWith("libxamarin")) return true;
+    return false;
+  });
 }
 
 function isKmpSkiko(libs: string[]): boolean {
@@ -107,6 +116,13 @@ function isReactNativeLibs(libs: string[]): boolean {
   const lower = libs.map((l) => l.toLowerCase());
   // New Architecture / merged artifacts often include "reactnative" in the .so file name.
   if (lower.some((l) => l.includes("reactnative"))) {
+    return true;
+  }
+  // New Architecture generated JNI (always RN when present).
+  if (lower.some((l) => l.includes("react_codegen"))) {
+    return true;
+  }
+  if (lower.some((l) => l === "libexpo-modules-core.so")) {
     return true;
   }
   // Hermes + JSI is the standard RN native stack (avoids tagging Hermes-only shells).
@@ -127,8 +143,11 @@ export function classifyStageOne(
   nativeLibraries: string[]
 ): StageOneResult {
   const frameworkSignals: string[] = [];
+  const libs = nativeLibraries
+    .map((l) => String(l).trim())
+    .filter((l) => l.length > 0);
 
-  if (hasExactLib(nativeLibraries, "libflutter.so")) {
+  if (hasExactLib(libs, "libflutter.so")) {
     frameworkSignals.push("libflutter.so");
     return {
       kind: "resolved",
@@ -137,7 +156,7 @@ export function classifyStageOne(
     };
   }
 
-  if (hasExactLib(nativeLibraries, "libunity.so")) {
+  if (hasExactLib(libs, "libunity.so")) {
     frameworkSignals.push("libunity.so");
     return {
       kind: "resolved",
@@ -146,9 +165,9 @@ export function classifyStageOne(
     };
   }
 
-  if (isDotnetStack(nativeLibraries)) {
-    nativeLibraries.forEach((l) => {
-      if (DOTNET_NATIVE_LIBS.has(l) || l.startsWith("libmono"))
+  if (isDotnetStack(libs)) {
+    libs.forEach((l) => {
+      if (DOTNET_NATIVE_LIBS.has(l) || isDotnetStack([l]))
         frameworkSignals.push(l);
     });
     return {
@@ -158,7 +177,7 @@ export function classifyStageOne(
     };
   }
 
-  if (hasExactLib(nativeLibraries, "libNativeScript.so")) {
+  if (hasExactLib(libs, "libNativeScript.so")) {
     frameworkSignals.push("libNativeScript.so");
     return {
       kind: "resolved",
@@ -167,8 +186,8 @@ export function classifyStageOne(
     };
   }
 
-  if (isKmpSkiko(nativeLibraries)) {
-    const skiko = nativeLibraries.find((l) => l.toLowerCase().includes("skiko"));
+  if (isKmpSkiko(libs)) {
+    const skiko = libs.find((l) => l.toLowerCase().includes("skiko"));
     if (skiko) frameworkSignals.push(skiko);
     return {
       kind: "resolved",
@@ -178,14 +197,28 @@ export function classifyStageOne(
     };
   }
 
-  if (isReactNativeLibs(nativeLibraries)) {
+  if (isReactNativeLibs(libs)) {
     REACT_NATIVE_LIBRARIES.forEach((n) => {
-      if (hasExactLib(nativeLibraries, n)) frameworkSignals.push(n);
+      if (hasExactLib(libs, n)) frameworkSignals.push(n);
     });
+    libs.forEach((l) => {
+      const low = l.toLowerCase();
+      if (low.includes("react_codegen")) frameworkSignals.push(l);
+    });
+    if (libs.some((l) => l.toLowerCase() === "libexpo-modules-core.so")) {
+      frameworkSignals.push("libexpo-modules-core.so");
+    }
+    const lower = libs.map((l) => l.toLowerCase());
+    if (
+      lower.some((l) => l.includes("hermes")) &&
+      lower.some((l) => l === "libjsi.so" || l.startsWith("libjsi."))
+    ) {
+      frameworkSignals.push("hermes+jsi");
+    }
     return {
       kind: "resolved",
       primaryFramework: "react-native",
-      frameworkSignals,
+      frameworkSignals: [...new Set(frameworkSignals)].slice(0, 12),
     };
   }
 
