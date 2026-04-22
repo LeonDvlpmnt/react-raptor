@@ -1,6 +1,6 @@
 /**
- * When using file:../android-app-list, the module's build/ output is gitignored.
- * Build it once if missing so Metro can resolve expo-android-app-list.
+ * If `expo-android-app-list` is consumed from a sibling source checkout and `build/` is
+ * missing (often gitignored), build it once so Metro can resolve the package entry.
  */
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -17,7 +17,7 @@ if (existsSync(marker)) {
 }
 
 console.warn(
-  "[react-raptor] Building local expo-android-app-list (first install or clean checkout)…"
+  "[react-raptor] Building expo-android-app-list from source (first install or clean checkout)…"
 );
 execSync("npm install --legacy-peer-deps && npm run build", {
   cwd: libRoot,

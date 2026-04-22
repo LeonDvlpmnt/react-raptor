@@ -11,25 +11,21 @@ It is aimed at developers who want a quick read on **what’s on the device**, n
 - **SDK hints** from library names and (optional deep scan) a few config paths.
 - Filters, presets, MMKV-backed settings, detail screen with optional zip-backed hints.
 
-## Monorepo layout
+## Native module
 
-```text
-raptor/
-  android-app-list/   # local fork of expo-android-app-list (native + TS)
-  react-raptor/       # this app
+Install the published dependency:
+
+```sh
+npx expo install expo-android-app-list
 ```
 
-The app depends on the module with:
+Rebuild the Android app after upgrading the module (`npx expo run:android`).
 
-```json
-"expo-android-app-list": "file:../android-app-list"
-```
+## Metro
 
-After changing **Kotlin** under `android-app-list/android/`, rebuild the dev client (`npx expo run:android`). **TypeScript-only** changes in `react-raptor` reload with Metro.
+If `expo-android-app-list` is resolved from **outside** the app project directory (for example while developing the module from source), ensure Metro’s `watchFolders` includes that package root so bundling resolves correctly. The included `metro.config.js` may already extend `watchFolders` for that layout.
 
-## Local module & Metro
-
-`react-raptor/metro.config.js` watches the repo parent and blocks resolving `android-app-list/node_modules` so Metro always uses **this app’s** `node_modules`. Use `npm run start:emu` / `npm run android:emu` when the Android **emulator** cannot reach Metro on the LAN IP (`REACT_NATIVE_PACKAGER_HOSTNAME` / `--localhost` + `adb reverse tcp:8081 tcp:8081`).
+Use `npm run start:emu` / `npm run android:emu` when the Android **emulator** cannot reach Metro on the LAN IP (`REACT_NATIVE_PACKAGER_HOSTNAME` / `--localhost` plus `adb reverse tcp:8081 tcp:8081`).
 
 ## Tech stack
 
@@ -51,9 +47,8 @@ After changing **Kotlin** under `android-app-list/android/`, rebuild the dev cli
 
 ## Store listing
 
-Google Play (when published):  
 [React Raptor on Google Play](https://play.google.com/store/apps/details?id=com.leonhh.reactraptor)
 
 ## License
 
-See upstream / package metadata for the app; the bundled `expo-android-app-list` fork remains **MIT** unless noted otherwise.
+See the app’s package metadata and license file for terms. The `expo-android-app-list` dependency is published under **MIT** unless its package states otherwise.
