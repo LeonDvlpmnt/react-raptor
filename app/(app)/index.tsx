@@ -21,7 +21,7 @@ export default function Index() {
       title: "React Native Apps",
       headerRight: () => <FilterButton />,
     });
-  }, []);
+  }, [navigation]);
 
   const insets = useSafeAreaInsets();
 
@@ -47,7 +47,7 @@ export default function Index() {
           paddingBottom: insets.bottom,
         }}
         data={data.filter((item) =>
-          item.appName.toLowerCase().includes(keyword.toLowerCase())
+          item.appName.toLowerCase().includes(keyword.toLowerCase()),
         )}
         renderItem={({ item }) => (
           <AppItem item={item} enabledTags={enabledTags} />

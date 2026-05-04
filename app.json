@@ -5,7 +5,9 @@
     "version": "2.0.6",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "platforms": ["android"],
+    "platforms": [
+      "android"
+    ],
     "scheme": "react-raptor",
     "userInterfaceStyle": "automatic",
     "android": {
@@ -26,7 +28,8 @@
           "imageWidth": 200
         }
       ],
-      "expo-build-properties"
+      "expo-build-properties",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,

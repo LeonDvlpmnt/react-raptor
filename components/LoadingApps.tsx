@@ -26,18 +26,18 @@ export const LoadingApps = () => {
     // infinite rotation
     rotation.value = withRepeat(
       withTiming(360, { duration: 2000, easing: Easing.linear }),
-      -1
+      -1,
     );
 
     // scale up and down within 2 seconds, do this infinitely
     scale.value = withRepeat(
       withSequence(
         withTiming(1.5, { duration: 1000, easing: Easing.quad }),
-        withTiming(1, { duration: 1000, easing: Easing.quad })
+        withTiming(1, { duration: 1000, easing: Easing.quad }),
       ),
-      -1
+      -1,
     );
-  }, []);
+  }, [rotation, scale]);
 
   return (
     <View style={styles.container}>

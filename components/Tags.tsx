@@ -17,10 +17,10 @@ export const Tags = (props: Props) => {
   const probablyExpo = nativeLibraries.includes("libexpo-modules-core.so");
   const usesExpoUpdates = expoConfig?.updates?.url !== undefined;
 
-  const tags: Array<{
+  const tags: {
     text: string;
     color: string;
-  }> = [];
+  }[] = [];
 
   if (enabledTags === undefined || enabledTags.includes("react-native")) {
     tags.push({

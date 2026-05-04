@@ -41,7 +41,7 @@ export const useSettingsStore = create<SettingsStore>()(
           return value === undefined ? null : value;
         },
         removeItem: (key) => {
-          storage.delete(key);
+          storage.remove(key);
         },
         clear: () => {
           storage.clearAll();
