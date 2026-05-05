@@ -12,7 +12,7 @@ ReactRaptor is an app made for React Native developers and enthusiasts. It analy
 
 ## Custom Expo Module
 
-ReactRaptor is powered by a custom Expo module, [expo-android-app-list](https://github.com/leonhh/expo-android-app-list). It is specifically developed for this app. This module leverages the `QUERY_ALL_PACKAGES` permission to fetch a list of installed applications.
+ReactRaptor is powered by inline Expo modules in `inline-modules/`. The native app-list module leverages the `QUERY_ALL_PACKAGES` permission to fetch installed applications, and the app icon view renders Android app drawables directly without serializing icon data through JavaScript.
 
 ## Technical Details
 

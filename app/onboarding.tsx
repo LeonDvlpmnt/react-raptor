@@ -1,5 +1,6 @@
+import { Button, Host, Text } from "@expo/ui/jetpack-compose";
 import { router, Stack } from "expo-router";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { useSettingsStore } from "@/helpers/settings";
 
@@ -16,21 +17,36 @@ export default function Onboarding() {
         contentFit="contain"
       />
 
-      <Text style={styles.text}>
-        Welcome to ReactRaptor! Discover which apps on your device are built
-        with React Native.
-      </Text>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => {
-          setHasFinishedOnboarding(true);
-
-          router.replace("/");
-        }}
+      <Host
+        matchContents={{ vertical: true }}
+        style={{ width: "80%" }}
+        colorScheme="dark"
+        seedColor="#E6AF2E"
       >
-        <Text style={styles.buttonText}>Get Started</Text>
-      </TouchableOpacity>
+        <Text
+          color="#ffffff"
+          style={{ typography: "titleMedium", textAlign: "center" }}
+        >
+          Welcome to ReactRaptor! Discover which apps on your device are built
+          with React Native.
+        </Text>
+      </Host>
+
+      <Host matchContents>
+        <Button
+          colors={{
+            containerColor: "#ffffff",
+            contentColor: "#191716",
+          }}
+          onClick={() => {
+            setHasFinishedOnboarding(true);
+
+            router.replace("/");
+          }}
+        >
+          <Text>Get Started</Text>
+        </Button>
+      </Host>
     </View>
   );
 }
@@ -47,23 +63,5 @@ const styles = StyleSheet.create({
   logo: {
     width: 175,
     height: 175,
-  },
-  text: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 18,
-    color: "#fff",
-    textAlign: "center",
-    width: "80%",
-  },
-  button: {
-    backgroundColor: "#fff",
-    padding: 10,
-    paddingHorizontal: 20,
-    borderRadius: 999,
-  },
-  buttonText: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 18,
-    color: "#191716",
   },
 });

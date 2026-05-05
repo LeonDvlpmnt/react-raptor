@@ -1,19 +1,22 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { Host, Icon, IconButton } from "@expo/ui/jetpack-compose";
 import { router } from "expo-router";
-import { Pressable } from "react-native";
 
 export const FilterButton = () => {
   return (
-    <Pressable
-      style={{
-        width: 24,
-        height: 24,
-      }}
-      onPressOut={() => {
-        router.navigate("/(app)/filter");
-      }}
-    >
-      <Ionicons name="options" size={24} color="#ffffff" />
-    </Pressable>
+    <Host matchContents>
+      <IconButton
+        onClick={() => {
+          router.navigate("/(app)/filter");
+        }}
+        colors={{ contentColor: "#ffffff" }}
+      >
+        <Icon
+          source={require("@/assets/icons/options.xml")}
+          size={24}
+          tint="#ffffff"
+          contentDescription="Filter"
+        />
+      </IconButton>
+    </Host>
   );
 };

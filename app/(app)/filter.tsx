@@ -1,8 +1,22 @@
 import { theme } from "@/constants/theme";
 import { useSettingsStore } from "@/helpers/settings";
-
-import { Text, StyleSheet, Switch, View } from "react-native";
+import { Host, Column, Row, Switch, Text } from "@expo/ui/jetpack-compose";
+import {
+  background,
+  fillMaxWidth,
+  padding,
+  paddingAll,
+  toggleable,
+  weight,
+} from "@expo/ui/jetpack-compose/modifiers";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const filters = [
+  { label: "React Native", tag: "react-native" },
+  { label: "Expo Modules", tag: "expo-modules" },
+  { label: "Expo Updates", tag: "expo-updates" },
+  { label: "New Architecture", tag: "new-architecture" },
+] as const;
 
 export default function FilterSheet() {
   const insets = useSafeAreaInsets();
@@ -10,104 +24,68 @@ export default function FilterSheet() {
   const { enabledTags, toggleTag } = useSettingsStore();
 
   return (
-    <View
-      style={[
-        styles.contentContainerStyle,
-        { paddingBottom: insets.bottom + 16 },
-      ]}
+    <Host
+      matchContents={{ vertical: true }}
+      style={{ width: "100%" }}
+      colorScheme="dark"
+      seedColor="#E6AF2E"
     >
-      <Text style={styles.title}>Tags</Text>
-
-      <View style={styles.filterRow}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.filterTitle}>React Native</Text>
-        </View>
-
-        <Switch
-          value={enabledTags.includes("react-native")}
-          onValueChange={() => {
-            toggleTag("react-native");
+      <Column
+        verticalArrangement={{ spacedBy: 12 }}
+        modifiers={[
+          fillMaxWidth(),
+          background(theme.primaryDarkColor),
+          padding(20, 16, 20, insets.bottom + 16),
+        ]}
+      >
+        <Text
+          color="#ffffff"
+          style={{
+            typography: "titleMedium",
+            fontWeight: "700",
+            textAlign: "center",
           }}
-          thumbColor="#ffffff"
-          trackColor={{ false: "#767577", true: "#E6AF2E" }}
-        />
-      </View>
+          modifiers={[fillMaxWidth()]}
+        >
+          Tags
+        </Text>
 
-      <View style={styles.filterRow}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.filterTitle}>Expo Modules</Text>
-        </View>
+        {filters.map((filter) => {
+          const checked = enabledTags.includes(filter.tag);
 
-        <Switch
-          value={enabledTags.includes("expo-modules")}
-          onValueChange={() => {
-            toggleTag("expo-modules");
-          }}
-          thumbColor="#ffffff"
-          trackColor={{ false: "#767577", true: "#E6AF2E" }}
-        />
-      </View>
-
-      <View style={styles.filterRow}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.filterTitle}>Expo Updates</Text>
-        </View>
-
-        <Switch
-          value={enabledTags.includes("expo-updates")}
-          onValueChange={() => {
-            toggleTag("expo-updates");
-          }}
-          thumbColor="#ffffff"
-          trackColor={{ false: "#767577", true: "#E6AF2E" }}
-        />
-      </View>
-
-      <View style={styles.filterRow}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.filterTitle}>New Architecture</Text>
-        </View>
-
-        <Switch
-          value={enabledTags.includes("new-architecture")}
-          onValueChange={() => {
-            toggleTag("new-architecture");
-          }}
-          thumbColor="#ffffff"
-          trackColor={{ false: "#767577", true: "#E6AF2E" }}
-        />
-      </View>
-    </View>
+          return (
+            <Row
+              key={filter.tag}
+              verticalAlignment="center"
+              horizontalArrangement="spaceBetween"
+              modifiers={[
+                fillMaxWidth(),
+                paddingAll(4),
+                toggleable(checked, () => toggleTag(filter.tag), {
+                  role: "switch",
+                }),
+              ]}
+            >
+              <Text
+                color="#ffffff"
+                style={{ typography: "titleMedium", fontWeight: "700" }}
+                modifiers={[weight(1)]}
+              >
+                {filter.label}
+              </Text>
+              <Switch
+                value={checked}
+                colors={{
+                  checkedThumbColor: "#ffffff",
+                  checkedTrackColor: "#E6AF2E",
+                  uncheckedThumbColor: "#ffffff",
+                  uncheckedTrackColor: "#767577",
+                }}
+              />
+            </Row>
+          );
+        })}
+      </Column>
+    </Host>
   );
 }
-
-const styles = StyleSheet.create({
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#fff",
-    textAlign: "center",
-  },
-  contentContainerStyle: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    backgroundColor: theme.primaryDarkColor,
-    gap: 12,
-  },
-  filterRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  filterTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#fff",
-    fontFamily: "Inter_400Regular",
-  },
-  filterSubText: {
-    fontSize: 14,
-    color: "#cccccc",
-    fontFamily: "Inter_400Regular",
-  },
-});

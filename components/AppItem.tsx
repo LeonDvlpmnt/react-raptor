@@ -1,8 +1,8 @@
 import { Link } from "expo-router";
 import { View, Text, StyleSheet, Pressable } from "react-native";
-import { Image } from "expo-image";
 import { ReactRaptorApp } from "@/hooks/useReactRaptorAppList";
 import { Tags } from "./Tags";
+import { AppIconView } from "./AppIconView";
 
 type Props = {
   item: ReactRaptorApp;
@@ -11,7 +11,7 @@ type Props = {
 
 export const AppItem = (props: Props) => {
   const {
-    item: { appName, packageName, icon },
+    item: { appName, packageName },
     enabledTags = [],
   } = props;
   return (
@@ -19,13 +19,7 @@ export const AppItem = (props: Props) => {
       <Pressable>
         <View style={styles.container}>
           <View style={styles.logoContainer}>
-            <Image
-              source={{
-                cacheKey: packageName,
-                uri: `data:image/png;base64,${icon}`,
-              }}
-              style={styles.logo}
-            />
+            <AppIconView packageName={packageName} style={styles.logo} />
           </View>
           <View style={styles.infoContainer}>
             <Text style={styles.appName}>{appName}</Text>
