@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   AndroidAppListPackage,
-  ExpoAndroidAppList,
-} from "expo-android-app-list";
+  ReactRaptorAppList,
+} from "@/modules/ReactRaptorAppListModule";
 import { ExpoConfig } from "@expo/config-types";
 
 const reactNativeLibraries = [
@@ -12,7 +12,6 @@ const reactNativeLibraries = [
 ];
 
 export type ReactRaptorApp = AndroidAppListPackage & {
-  icon: string;
   nativeLibraries: string[];
   expoConfig?: ExpoConfig;
   permissions: string[];
@@ -21,15 +20,15 @@ export type ReactRaptorApp = AndroidAppListPackage & {
 export const reactRaptorAppListQueryFn = async () => {
   const combinedResults: ReactRaptorApp[] = [];
 
-  const result = await ExpoAndroidAppList.getAll();
+  const result = await ReactRaptorAppList.getAll();
 
   for (const pkg of result) {
     if (pkg.isSystemApp) {
       continue;
     }
 
-    const nativeLibraries = await ExpoAndroidAppList.getNativeLibraries(
-      pkg.packageName
+    const nativeLibraries = await ReactRaptorAppList.getNativeLibraries(
+      pkg.packageName,
     );
 
     // The facebook and instagram apps have a react_native_routes.json file in it's assets folder
@@ -46,16 +45,13 @@ export const reactRaptorAppListQueryFn = async () => {
       nativeLibraries.some((lib) => reactNativeLibraries.includes(lib)) ||
       manuallVerifiedApps.includes(pkg.packageName)
     ) {
-      const [filesResult, iconResult, permissionsResult] =
-        await Promise.allSettled([
-          ExpoAndroidAppList.getFiles(pkg.packageName, ["assets/app.config"]),
-          ExpoAndroidAppList.getAppIcon(pkg.packageName),
-          ExpoAndroidAppList.getPermissions(pkg.packageName),
-        ]);
+      const [filesResult, permissionsResult] = await Promise.allSettled([
+        ReactRaptorAppList.getFiles(pkg.packageName, ["assets/app.config"]),
+        ReactRaptorAppList.getPermissions(pkg.packageName),
+      ]);
 
       const files =
         filesResult.status === "fulfilled" ? filesResult.value : undefined;
-      const icon = iconResult.status === "fulfilled" ? iconResult.value : "";
       const permissions =
         permissionsResult.status === "fulfilled" ? permissionsResult.value : [];
 
@@ -71,7 +67,6 @@ export const reactRaptorAppListQueryFn = async () => {
 
       combinedResults.push({
         ...pkg,
-        icon,
         expoConfig,
         nativeLibraries,
         permissions,

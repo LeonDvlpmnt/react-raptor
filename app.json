@@ -13,7 +13,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#191716"
       },
-      "package": "com.leonhh.reactraptor"
+      "package": "com.leonhh.reactraptor",
+      "permissions": ["android.permission.QUERY_ALL_PACKAGES"]
     },
     "plugins": [
       "expo-router",
@@ -30,6 +31,9 @@
       "expo-image"
     ],
     "experiments": {
+      "inlineModules": {
+        "watchedDirectories": ["components", "modules"]
+      },
       "typedRoutes": true,
       "reactCompiler": true
     },

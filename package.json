@@ -18,7 +18,6 @@
     "babel-plugin-react-compiler": "^1.0.0",
     "eslint-plugin-react-compiler": "^19.1.0-rc.2",
     "expo": "^56.0.0-canary-20260501-15d3529",
-    "expo-android-app-list": "1.1.0",
     "expo-build-properties": "56.0.0-canary-20260501-15d3529",
     "expo-constants": "56.0.0-canary-20260501-15d3529",
     "expo-dev-client": "56.0.0-canary-20260501-15d3529",

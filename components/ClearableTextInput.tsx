@@ -1,5 +1,16 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Host,
+  Icon,
+  OutlinedTextField,
+  Text,
+  type TextFieldRef,
+} from "@expo/ui/jetpack-compose";
+import {
+  clickable,
+  fillMaxWidth,
+  padding,
+} from "@expo/ui/jetpack-compose/modifiers";
+import { useRef } from "react";
 
 type Props = {
   value: string;
@@ -9,48 +20,41 @@ type Props = {
 
 export const ClearableTextInput = (props: Props) => {
   const { value, onChangeText, placeholder = "Search..." } = props;
+  const textFieldRef = useRef<TextFieldRef>(null);
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder={placeholder}
-        placeholderTextColor="#888"
-        value={value}
-        onChangeText={onChangeText}
-      />
-      {value.length > 0 && (
-        <TouchableOpacity
-          onPress={() => onChangeText("")}
-          style={styles.clearButton}
-        >
-          <Ionicons name="close" size={24} color="#888" />
-        </TouchableOpacity>
-      )}
-    </View>
+    <Host matchContents={{ vertical: true }} style={{ width: "100%" }}>
+      <OutlinedTextField
+        ref={textFieldRef}
+        onValueChange={onChangeText}
+        singleLine
+        keyboardOptions={{
+          autoCorrectEnabled: false,
+          imeAction: "search",
+        }}
+        modifiers={[fillMaxWidth(), padding(10, 10, 10, 6)]}
+      >
+        <OutlinedTextField.Placeholder>
+          <Text color="#888888">{placeholder}</Text>
+        </OutlinedTextField.Placeholder>
+
+        {value.length > 0 ? (
+          <OutlinedTextField.TrailingIcon>
+            <Icon
+              source={require("@/assets/icons/close.xml")}
+              size={24}
+              tint="#666666"
+              contentDescription="Clear search"
+              modifiers={[
+                clickable(() => {
+                  textFieldRef.current?.setText("");
+                  onChangeText("");
+                }),
+              ]}
+            />
+          </OutlinedTextField.TrailingIcon>
+        ) : null}
+      </OutlinedTextField>
+    </Host>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    position: "relative",
-    width: "100%",
-  },
-  input: {
-    borderColor: "#ccc",
-    borderWidth: 1,
-    paddingLeft: 12,
-    paddingRight: 36, // space for clear button
-    borderRadius: 8,
-    margin: 10,
-  },
-  clearButton: {
-    position: "absolute",
-    right: 12,
-    top: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    width: 32,
-  },
-});

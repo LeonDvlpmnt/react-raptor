@@ -1,4 +1,9 @@
-import { ScrollView, Text, View, StyleSheet } from "react-native";
+import { Column, Host, Text } from "@expo/ui/jetpack-compose";
+import {
+  fillMaxSize,
+  fillMaxWidth,
+  padding,
+} from "@expo/ui/jetpack-compose/modifiers";
 
 type Props = {
   errorMessage?: string;
@@ -8,40 +13,34 @@ export const NoResults = (props: Props) => {
   const { errorMessage } = props;
 
   return (
-    <ScrollView
-      contentContainerStyle={{
-        paddingTop: 15,
-        gap: 10,
-      }}
-    >
-      <Text style={styles.title}>No React Native apps found</Text>
+    <Host style={{ flex: 1 }} colorScheme="light">
+      <Column
+        horizontalAlignment="center"
+        verticalArrangement={{ spacedBy: 10 }}
+        modifiers={[fillMaxSize(), padding(16, 15, 16, 16)]}
+      >
+        <Text
+          color="#000000"
+          style={{
+            typography: "headlineSmall",
+            fontWeight: "700",
+            textAlign: "center",
+          }}
+          modifiers={[fillMaxWidth()]}
+        >
+          No React Native apps found
+        </Text>
 
-      {errorMessage ? (
-        <View style={styles.textContainer}>
-          <Text style={[styles.text, { fontSize: 12 }]}>{errorMessage}</Text>
-        </View>
-      ) : null}
-    </ScrollView>
+        {errorMessage ? (
+          <Text
+            color="#000000"
+            style={{ typography: "bodySmall", textAlign: "center" }}
+            modifiers={[fillMaxWidth()]}
+          >
+            {errorMessage}
+          </Text>
+        ) : null}
+      </Column>
+    </Host>
   );
 };
-
-const styles = StyleSheet.create({
-  textContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  title: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 24,
-    color: "#000",
-    textAlign: "center",
-  },
-  text: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 18,
-    color: "#000",
-    textAlign: "center",
-    width: "80%",
-  },
-});
